@@ -1,0 +1,1000 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhokal Chandlers - Premium Ship Chandling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https \https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #fff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3 {
+            font-family: 'Lora', serif;
+            font-weight: 700;
+        }
+        .teal-bg {
+            background-color: #006666;
+        }
+        .gold-accent {
+            color: #D4AF37;
+        }
+        .silver-text {
+            color: #C0C0C0;
+        }
+        .nav-link:hover {
+            color: #D4AF37;
+            transition: color 0.3s ease;
+        }
+        .hero-bg {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #006666 0%, #D4AF37 100%);
+            background-image: url('https://via.placeholder.com/1920x1080?text=Hero+Image');
+            background-size: cover;
+            background-position: center;
+        }
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 102, 102, 0.7), rgba(212, 175, 55, 0.4));
+            box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.7), inset 20px 20px 40px rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+        .texture-3d {
+            position: relative;
+            z-index: 2;
+            box-shadow: 15px 15px 30px rgba(0, 0, 0, 0.4), -15px -15px 30px rgba(255, 255, 255, 0.2);
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(0, 102, 102, 0.15));
+            border-radius: 20px;
+            transition: transform 0.6s ease, box-shadow 0.6s ease;
+        }
+        .texture-3d:hover {
+            transform: translateZ(10px) scale(1.03);
+            box-shadow: 20px 20px 40px rgba(0, 0, 0, 0.5), -20px -20px 40px rgba(255, 255, 255, 0.25);
+        }
+        .card-3d {
+            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3), -10px -10px 20px rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+        .card-3d:hover {
+            transform: translateY(-8px) rotateX(5deg);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        .image-3d {
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+        .image-3d:hover {
+            transform: scale(1.1) rotateZ(3deg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        .btn-teal {
+            background-color: #006666;
+            color: #fff;
+            border: 2px solid #D4AF37;
+            position: relative;
+            overflow: hidden;
+            padding: 12px 24px;
+            touch-action: manipulation;
+        }
+        .btn-teal:hover {
+            background-color: #D4AF37;
+            color: #006666;
+            transition: all 0.3s ease;
+        }
+        .btn-teal::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(212, 175, 55, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+        .btn-teal:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .sticky-quote {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 20;
+            padding: 10px 20px;
+            border-radius: 25px;
+        }
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #006666;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        #preloader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+        }
+        .gallery-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #006666;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #006666;
+            color: #fff;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 20;
+            display: none;
+            transition: background 0.3s ease;
+        }
+        .back-to-top:hover {
+            background: #D4AF37;
+            color: #006666;
+        }
+        .filter-btn {
+            transition: background 0.3s ease, color 0.3s ease;
+            padding: 10px 20px;
+            touch-action: manipulation;
+        }
+        .filter-btn.active {
+            background: #D4AF37;
+            color: #006666;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 15px;
+            border-radius: 20px;
+            max-width: 90%;
+            width: 500px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 10px;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .carousel-item {
+            min-width: 300px;
+            text-align: center;
+            flex: 0 0 auto;
+        }
+        .counter {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #006666;
+        }
+        .accordion-item {
+            border-bottom: 1px solid #ddd;
+        }
+        .accordion-header {
+            cursor: pointer;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            margin: 5px 0;
+            touch-action: manipulation;
+        }
+        .accordion-content {
+            display: none;
+            padding: 15px;
+        }
+        .nav-shadow {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .about-image {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        .section-bg {
+            background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+        }
+        .footer-wave {
+            position: relative;
+            margin-top: -1px;
+        }
+        .wave {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSI1MHB4IiB2aWV3Qm94PSIwIDAgMTkyMCA1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMCAwSDAuMHY1MGMwIDAgNDgwIC0yMCA5NjAgMFMxNDQwIDIwIDE5MjAgMGgtMTkyMHoiIGZpbGw9IiMwMDY2NjYiLz48L3N2Zz4=');
+            background-size: cover;
+        }
+        @media (max-width: 768px) {
+            .hero-bg {
+                height: 70vh;
+            }
+            .container {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+            .texture-3d {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            p {
+                font-size: 0.9rem;
+            }
+            .btn-teal {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .modal-content {
+                width: 90%;
+                max-width: 350px;
+            }
+            .carousel-item {
+                min-width: 250px;
+            }
+            .about-image {
+                max-width: 200px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="text-white text-2xl animate-pulse">Loading...</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="teal-bg text-white fixed w-full z-10 transition-shadow" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="texture-3d p-3 flex justify-center items-center">
+                    <img src="https://png.pngtree.com/png-vector/20241110/ourmid/pngtree-steering-through-the-storm-png-image_14389008.png" alt="Bhokal Chandlers Logo" class="h-12">
+                </div>
+                <h1 class="text-2xl ml-2">Bhokal Chandlers</h1>
+            </div>
+            <div class="space-x-6 hidden md:flex">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#about" class="nav-link">About Us</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#gallery" class="nav-link">Gallery</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden teal-bg text-white space-y-2 px-4 py-2 hidden">
+            <a href="#home" class="block nav-link py-2">Home</a>
+            <a href="#about" class="block nav-link py-2">About Us</a>
+            <a href="#services" class="block nav-link py-2">Services</a>
+            <a href="#gallery" class="block nav-link py-2">Gallery</a>
+            <a href="#contact" class="block nav-link py-2">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Sticky Buttons -->
+    <a href="#quote" class="sticky-quote px-4 py-2 rounded-full btn-teal shadow-lg">Request a Quote</a>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="back-to-top" aria-label="Back to Top">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+
+    <!-- Home Page -->
+    <section id="home" class="hero-bg relative fade-in">
+        <canvas id="particles"></canvas>
+        <div class="hero-overlay"></div>
+        <div class="relative z-10 container mx-auto px-4 pt-32 pb-10 text-center text-white">
+            <div class="texture-3d p-10 inline-block">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl mb-4">Bhokal Ship Chandling</h1>
+                <p class="text-lg md:text-xl lg:text-2xl mb-6">Premium Provisions from Kariakoo, Dar es Salaam</p>
+                <a href="#services" class="btn-teal px-6 py-3 rounded border border-gold-accent btn-pulse text-base md:text-lg">Discover Now</a>
+            </div>
+        </div>
+        <div class="container mx-auto px-4 py-4 teal-bg text-white text-center">
+            <p class="text-base md:text-lg">Call Us: <a href="tel:+255679268287" class="underline gold-accent">+255 679268287</a> | Email: <a href="mailto:bhokal.chandlers@gmail.com" class="underline gold-accent">bhokal.chandlers@gmail.com</a></p>
+        </div>
+        <div class="container mx-auto px-4 py-10">
+            <h2 class="text-3xl font-bold text-teal-bg text-center mb-6">Our Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-visible">
+                <div class="card-3d p-6 rounded-lg text-center" onclick="openModal('food')">
+                    <img src="https://amkmarineservices.com/assets/img/services/services1.jpg" alt="Food Provision" class="w-full h-48 object-cover rounded-t-lg image-3d">
+                    <h3 class="text-2xl font-semibold mb-4">Food Provision</h3>
+                    <p>Click for details.</p>
+                </div>
+                <div class="card-3d p-6 rounded-lg text-center" onclick="openModal('toiletries')">
+                    <img src="https://image.shutterstock.com/image-vector/toiletry-colorful-graphics-elements-illustrations-260nw-2013390509.jpg" alt="Toiletries" class="w-full h-48 object-cover rounded-t-lg image-3d">
+                    <h3 class="text-2xl font-semibold mb-4">Toiletries</h3>
+                    <p>Click for details.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Counter -->
+    <section id="stats" class="py-20 bg-white section-bg fade-in">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold text-teal-bg mb-10 texture-3d p-6 inline-block">Our Achievements</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <div class="counter" id="years-counter">0</div>
+                    <p class="text-lg">Years of Service</p>
+                </div>
+                <div>
+                    <div class="counter" id="clients-counter">0</div>
+                    <p class="text-lg">Clients Served</p>
+                </div>
+                <div>
+                    <div class="counter" id="vessels-counter">0</div>
+                    <p class="text-lg">Vessels Supplied</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us -->
+    <section id="about" class="py-20 bg-white section-bg fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-teal-bg text-center mb-10 texture-3d p-6 inline-block">About Us</h2>
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2">
+                    <h3 class="text-2xl font-semibold mb-4">Our Story</h3>
+                    <p class="mb-4">Bhokal Chandlers, based in Kariakoo, Dar es Salaam, has been a trusted name in luxury ship chandling for over a decade.</p>
+                    <h3 class="text-2xl font-semibold mb-4">Our Mission</h3>
+                    <p class="mb-4">To provide top-tier quality and reliability, ensuring every vessel is fully equipped for success.</p>
+                    <h3 class="text-2xl font-semibold mb-4">Why Choose Us?</h3>
+                    <p>We excel in speed, quality, and customer satisfaction, serving the maritime industry with excellence.</p>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img src="https://hslanka.com/assets/images/ship-chandlers-second.jpg" alt="About Bhokal Chandlers" class="about-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Services -->
+    <section id="services" class="py-20 teal-bg text-black fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-6 texture-3d p-6 inline-block">Our Services</h2>
+            <div class="mb-4 flex justify-center space-x-4">
+                <button class="filter-btn px-4 py-2 rounded btn-teal" data-filter="all">All</button>
+                <button class="filter-btn px-4 py-2 rounded btn-teal" data-filter="food">Food</button>
+                <button class="filter-btn px-4 py-2 rounded btn-teal" data-filter="toiletries">Toiletries</button>
+            </div>
+            <div id="service-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card-3d p-6 rounded-lg service-item food" data-category="food" onclick="openModal('food')">
+                    <img src="https://amkmarineservices.com/assets/img/services/services1.jpg" alt="Food Provision" class="w-full h-48 object-cover rounded-t-lg">
+                    <h3 class="text-2xl font-semibold mb-4">Food Provision</h3>
+                    <p>Premium fresh, frozen, and dry goods.</p>
+                </div>
+                <div class="card-3d p-6 rounded-lg service-item toiletries" data-category="toiletries" onclick="openModal('toiletries')">
+                    <img src="https://image.shutterstock.com/image-vector/toiletry-colorful-graphics-elements-illustrations-260nw-2013390509.jpg" alt="Toiletries" class="w-full h-48 object-cover rounded-t-lg">
+                    <h3 class="text-2xl font-semibold mb-4">Toiletries</h3>
+                    <p>Luxury hygiene products for crew comfort.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="py-20 bg-white section-bg fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-teal-bg text-center mb-10 texture-3d p-6 inline-block">Gallery</h2>
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div class="gallery-spinner">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+            <img id="lightbox-img" src="" alt="Gallery Image">
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-20 teal-bg text-black fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-10 texture-3d p-6 inline-block">Client Testimonials</h2>
+            <div class="carousel" id="testimonial-carousel">
+                <div class="carousel-item card-3d p-6 rounded-lg">
+                    <p class="italic mb-4">"Exceptional service and quality provisions!"</p>
+                    <p class="font-semibold">- Captain A. Mwinyi</p>
+                </div>
+                <div class="carousel-item card-3d p-6 rounded-lg">
+                    <p class="italic mb-4">"Fast delivery and premium toiletries."</p>
+                    <p class="font-semibold">- Crew Leader J. Kim</p>
+                </div>
+                <div class="carousel-item card-3d p-6 rounded-lg">
+                    <p class="italic mb-4">"Reliable and professional team!"</p>
+                    <p class="font-semibold">- Ship Manager L. Patel</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-20 bg-white section-bg fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-teal-bg text-center mb-10 texture-3d p-6 inline-block">Frequently Asked Questions</h2>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">What types of provisions do you offer?</div>
+                    <div class="accordion-content">We offer fresh, frozen, and dry goods, as well as luxury toiletries tailored for maritime needs.</div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">How can I request a quote?</div>
+                    <div class="accordion-content">You can use the "Request a Quote" button or form on our website to submit your requirements.</div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header">Do you deliver internationally?</div>
+                    <div class="accordion-content">Yes, we provide services to vessels across various regions. Contact us for more details.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us -->
+    <section id="contact" class="py-20 teal-bg text-white fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-10 texture-3d p-6 inline-block">Contact Us</h2>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-full">
+                    <p class="mb-4"><strong>Phone:</strong> <a href="tel:+255679268287" class="underline gold-accent"><svg class="inline w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.38 2.33.61 3.57.61.55 0 1.45 1 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.23 2.45.61 3.57.13.35.03.75-.24 1.02l-2.2 2.2z"/></svg>+255 679268287</a></p>
+                    <p class="mb-4"><strong>Email:</strong> <a href="mailto:bhokal.chandlers@gmail.com" class="underline gold-accent"><svg class="inline w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>bhokal.chandlers@gmail.com</a></p>
+                    <p class="mb-4"><strong>Address:</strong> Kariakoo, Dar es Salaam, Tanzania</p>
+                    <div class="w-full h-64 rounded-lg overflow-hidden">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.902929294242!2d39.27634531477287!3d-6.818345995071834!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x185c4b5c5c5c5c5c%3A0x5c5c5c5c5c5c5c5c!2sKariakoo%2C%20Dar%20es%20Salaam%2C%20Tanzania!5e0!3m2!1sen!2sus!4v1698765432123" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" aria-label="Map of Kariakoo, Dar es Salaam" id="map"></iframe>
+                    </div>
+                    <div id="weather" class="mt-4 p-4 bg-white text-teal-bg rounded-lg shadow-lg"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Request a Quote -->
+    <section id="quote" class="py-20 bg-white section-bg fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-teal-bg text-center mb-10 texture-3d p-6 inline-block">Request a Quote</h2>
+            <div class="max-w-lg mx-auto teal-bg text-white p-6 rounded-lg card-3d">
+                <div>
+                    <div class="mb-4">
+                        <label for="quote-name" class="block mb-2">Name</label>
+                        <input type="text" id="quote-name" class="w-full p-2 rounded bg-gray-100 text-teal-bg" placeholder="Your Name" required aria-required="true">
+                    </div>
+                    <div class="mb-4">
+                        <label for="quote-email" class="block mb-2">Email</label>
+                        <input type="email" id="quote-email" class="w-full p-2 rounded bg-gray-100 text-teal-bg" placeholder="Your Email" required aria-required="true">
+                    </div>
+                    <div class="mb-4">
+                        <label for="quote-vessel" class="block mb-2">Vessel Name (Optional)</label>
+                        <input type="text" id="quote-vessel" class="w-full p-2 rounded bg-gray-100 text-teal-bg" placeholder="Vessel Name">
+                    </div>
+                    <div class="mb-4">
+                        <label for="quote-file" class="block mb-2">Upload File (Optional)</label>
+                        <input type="text" id="quote-file" class="w-full p-2 rounded bg-gray-100 text-teal-bg" placeholder="Enter file name or description">
+                    </div>
+                    <div class="mb-4">
+                        <label for="quote-details" class="block mb-2">Requirements</label>
+                        <textarea id="quote-details" class="w-full p-2 rounded bg-gray-100 text-teal-bg" rows="4" placeholder="Details of Your Needs" required aria-required="true"></textarea>
+                    </div>
+                    <button class="btn-teal px-6 py-2 rounded border border-gold-accent">Submit Request</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="teal-bg text-white py-10 footer-wave">
+        <div class="wave"></div>
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Bhokal Chandlers</h3>
+                    <p>Kariakoo, Dar es Salaam, Tanzania</p>
+                    <p class="mt-2"><a href="tel:+255679268287" class="underline gold-accent">+255 679268287</a></p>
+                    <p><a href="mailto:bhokal.chandlers@gmail.com" class="underline gold-accent">bhokal.chandlers@gmail.com</a></p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Quick Links</h3>
+                    <ul>
+                        <li><a href="#home" class="underline gold-accent hover:text-white">Home</a></li>
+                        <li><a href="#about" class="underline gold-accent hover:text-white">About Us</a></li>
+                        <li><a href="#services" class="underline gold-accent hover:text-white">Services</a></li>
+                        <li><a href="#gallery" class="underline gold-accent hover:text-white">Gallery</a></li>
+                        <li><a href="#contact" class="underline gold-accent hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <p>© 2025 Bhokal Chandlers. All Rights Reserved.</p>
+                <div class="mt-4 flex justify-center space-x-4">
+                    <a href="#" class="text-silver-text hover:text-gold-accent transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2v-2zm0 4h2v6h-2v-6z"/></svg></a>
+                    <a href="#" class="text-silver-text hover:text-gold-accent transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2v-2zm0 4h2v6h-2v-6z"/></svg></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for Service Details -->
+    <div id="service-modal" class="modal">
+        <div class="modal-content texture-3d p-6">
+            <h3 id="modal-title" class="text-2xl font-semibold mb-4"></h3>
+            <p id="modal-description" class="mb-4"></p>
+            <p><strong>Available Stock:</strong> <span id="modal-stock"></span></p>
+            <button class="btn-teal px-6 py-2 rounded border border-gold-accent mt-4" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Mobile Menu Toggle
+        try {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.add('hidden');
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Mobile menu error:', error);
+        }
+
+        // Preloader
+        try {
+            window.addEventListener('load', () => {
+                const preloader = document.getElementById('preloader');
+                if (preloader) preloader.classList.add('hidden');
+            });
+        } catch (error) {
+            console.error('Preloader error:', error);
+        }
+
+        // Back to Top
+        try {
+            const backToTop = document.getElementById('back-to-top');
+            if (backToTop) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 300) backToTop.style.display = 'block';
+                    else backToTop.style.display = 'none';
+                });
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        } catch (error) {
+            console.error('Back to top error:', error);
+        }
+
+        // Sticky Header Shadow
+        try {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) navbar.classList.add('nav-shadow');
+                    else navbar.classList.remove('nav-shadow');
+                });
+            }
+        } catch (error) {
+            console.error('Sticky header shadow error:', error);
+        }
+
+        // Fade-in Animation
+        try {
+            const fadeInElements = document.querySelectorAll('.fade-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            fadeInElements.forEach(element => observer.observe(element));
+        } catch (error) {
+            console.error('Fade-in animation error:', error);
+        }
+
+        // Lightbox
+        function openLightbox(src) {
+            try {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightbox-img');
+                if (lightbox && lightboxImg) {
+                    lightboxImg.src = src;
+                    lightbox.style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Lightbox error:', error);
+            }
+        }
+        function closeLightbox() {
+            try {
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox) lightbox.style.display = 'none';
+            } catch (error) {
+                console.error('Close lightbox error:', error);
+            }
+        }
+
+        // Lazy Load Gallery Images
+        try {
+            const galleryGrid = document.getElementById('gallery-grid');
+            const galleryItems = [
+                { src: 'https://themarineexpress.com/wp-content/uploads/2019/08/Ship-Chandelling-Bahuvida-banner.jpg', alt: 'Supplies' },
+                { src: 'https://news.mit.edu/sites/default/files/images/202407/MIT-Ammonia-Fuel-01.jpg', alt: 'Vessel' },
+                { src: 'https://cdn.gac.com/prod/images/Americas/Brazil/_1200x630_crop_center-center_82_none/Ship-Chandling.jpg?mtime=1624500165', alt: 'Chandling' },
+                { src: 'https://aquamaristrading.com/wp-content/uploads/2024/02/Ship-Chandler-Services-Dubai-scaled.jpg', alt: 'Delivery' }
+            ];
+
+            window.addEventListener('load', () => {
+                galleryGrid.innerHTML = '';
+                galleryItems.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'image-3d overflow-hidden rounded-lg shadow-lg';
+                    div.onclick = () => openLightbox(item.src);
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = item.alt;
+                    img.className = 'w-full h-64 object-cover';
+                    img.loading = 'lazy';
+                    div.appendChild(img);
+                    galleryGrid.appendChild(div);
+                });
+            });
+        } catch (error) {
+            console.error('Gallery load error:', error);
+        }
+
+        // Interactive Map
+        try {
+            const map = document.getElementById('map');
+            if (map) {
+                map.addEventListener('click', () => {
+                    window.open('https://www.google.com/maps/place/Kariakoo,+Dar+es+Salaam,+Tanzania', '_blank');
+                });
+            }
+        } catch (error) {
+            console.error('Map error:', error);
+        }
+
+        // Service Filter
+        try {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const serviceItems = document.querySelectorAll('.service-item');
+            if (filterButtons.length && serviceItems.length) {
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        const filter = button.getAttribute('data-filter');
+                        serviceItems.forEach(item => {
+                            if (filter === 'all') item.style.display = 'block';
+                            else if (item.getAttribute('data-category') === filter) item.style.display = 'block';
+                            else item.style.display = 'none';
+                        });
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Service filter error:', error);
+        }
+
+        // Service Modal
+        function openModal(service) {
+            try {
+                const modal = document.getElementById('service-modal');
+                const modalTitle = document.getElementById('modal-title');
+                const modalDescription = document.getElementById('modal-description');
+                const modalStock = document.getElementById('modal-stock');
+                if (modal && modalTitle && modalDescription && modalStock) {
+                    if (service === 'food') {
+                        modalTitle.textContent = 'Food Provision';
+                        modalDescription.textContent = 'We provide premium fresh, frozen, and dry goods tailored to your crew’s dietary needs.';
+                        modalStock.textContent = 'Available: 500kg Fresh, 300kg Frozen, 200kg Dry (Updated: May 04, 2025)';
+                    } else if (service === 'toiletries') {
+                        modalTitle.textContent = 'Toiletries';
+                        modalDescription.textContent = 'Luxury hygiene products including soaps, shampoos, and specialized maritime items.';
+                        modalStock.textContent = 'Available: 1000 units Soaps, 800 units Shampoos (Updated: May 04, 2025)';
+                    }
+                    modal.style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Open modal error:', error);
+            }
+        }
+        function closeModal() {
+            try {
+                const modal = document.getElementById('service-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Close modal error:', error);
+            }
+        }
+        try {
+            const modal = document.getElementById('service-modal');
+            if (modal) {
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModal();
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Modal outside click error:', error);
+        }
+
+        // Weather Widget (Placeholder)
+        try {
+            const weatherDiv = document.getElementById('weather');
+            if (weatherDiv) {
+                weatherDiv.innerHTML = '<p>Weather in Kariakoo: 28°C, Sunny <br><small>(API key required for live data)</small>';
+            }
+        } catch (error) {
+            console.error('Weather widget error:', error);
+        }
+
+        // Stats Counter Animation
+        try {
+            const counters = {
+                years: { element: document.getElementById('years-counter'), target: 10 },
+                clients: { element: document.getElementById('clients-counter'), target: 150 },
+                vessels: { element: document.getElementById('vessels-counter'), target: 300 }
+            };
+            Object.values(counters).forEach(counter => {
+                if (counter.element) {
+                    let count = 0;
+                    const increment = counter.target / 100;
+                    const interval = setInterval(() => {
+                        count += increment;
+                        if (count >= counter.target) {
+                            count = counter.target;
+                            clearInterval(interval);
+                        }
+                        counter.element.textContent = Math.round(count);
+                    }, 20);
+                }
+            });
+        } catch (error) {
+            console.error('Counter animation error:', error);
+        }
+
+        // FAQ Accordion
+        try {
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            if (accordionHeaders.length) {
+                accordionHeaders.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const content = header.nextElementSibling;
+                        if (content.style.display === 'block') {
+                            content.style.display = 'none';
+                        } else {
+                            document.querySelectorAll('.accordion-content').forEach(item => {
+                                item.style.display = 'none';
+                            });
+                            content.style.display = 'block';
+                        }
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Accordion error:', error);
+        }
+
+        // Testimonial Carousel Auto-Scroll
+        try {
+            const carousel = document.getElementById('testimonial-carousel');
+            if (carousel) {
+                let scrollAmount = 0;
+                const scrollStep = 1;
+                const scrollInterval = setInterval(() => {
+                    scrollAmount += scrollStep;
+                    carousel.scrollLeft = scrollAmount;
+                    if (scrollAmount >= carousel.scrollWidth - carousel.clientWidth) {
+                        scrollAmount = 0;
+                    }
+                }, 20);
+            }
+        } catch (error) {
+            console.error('Testimonial carousel error:', error);
+        }
+
+        // Particle Animation (Optimized)
+        try {
+            const canvas = document.getElementById('particles');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particlesArray = [];
+            const numberOfParticles = 30; // Reduced for performance
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 2 - 1;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.size > 0.2) this.size -= 0.1;
+                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                }
+                draw() {
+                    ctx.fillStyle = 'rgba(212, 175, 55, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                    if (particlesArray[i].size <= 0.2) {
+                        particlesArray.splice(i, 1);
+                        i--;
+                        particlesArray.push(new Particle());
+                    }
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles();
+            animateParticles();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        } catch (error) {
+            console.error('Particle animation error:', error);
+        }
+    </script>
+</body>
+</html>
